@@ -114,8 +114,8 @@ case class Launched(countDown: Int, position: Point, direction: Angle, numberOfP
    */
   def next: Firework =
     if countDown > 0 then
-      copy(countDown = countDown - 1)
-      copy(direction = direction)
+      val nextPosition = Motion.movePoint(point = position, direction, Settings.propulsionSpeed)
+      copy(countDown = countDown - 1, nextPosition, direction = direction)
     else 
       Exploding.init(numberOfParticles,direction=direction,position,particlesColor)
 
@@ -155,7 +155,10 @@ case class Exploding(countDown: Int, particles: Particles) extends Firework:
    *       of this firework.
    */
   def next: Firework =
-    ???
+    if countDown > 0 then
+      copy(countDown = countDown - 1,particles = particles.next)
+    else 
+      Done
 
 end Exploding
 
@@ -201,17 +204,19 @@ case class Particle(horizontalSpeed: Double, verticalSpeed: Double, position: Po
     // Horizontal speed is only subject to air friction, its next value
     // should be the current value reduced by air friction
     // Hint: use the operation `Motion.drag`
-    val updatedHorizontalSpeed =
-      ???
+    val updatedHorizontalSpeed = 
+      Motion.drag(horizontalSpeed)
+
     // Vertical speed is subject to both air friction and gravity, its next
     // value should be the current value minus the gravity, then reduced by
     // air friction
-    val updatedVerticalSpeed =
-      ???
+    val updatedVerticalSpeed = 
+      Motion.drag(verticalSpeed - Settings.gravity)
+
     // Particle position is updated according to its new speed
     val updatedPosition = Point(position.x + horizontalSpeed, position.y + verticalSpeed)
     // Construct a new particle with the updated position and speed
-    ???
+    copy(horizontalSpeed = updatedHorizontalSpeed, verticalSpeed = updatedVerticalSpeed, position = updatedPosition)
 
 end Particle
 
